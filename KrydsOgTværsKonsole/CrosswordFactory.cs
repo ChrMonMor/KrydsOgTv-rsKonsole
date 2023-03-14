@@ -85,25 +85,16 @@ namespace KrydsOgTværsKonsole
                 {
 
                 }
-                else
+                else //↓↓↓there is something here that ducks stuff up ↓↓↓
                 {
                     oldBoard = InsertWordIntoBoardHorizontal(newBoard, wordsWithLetter[i], letterIndexes[0], currentIndex, wordDifferents);
                 }
-
-                if (FoundFlawInBoard(oldBoard)) continue;
-                else
+                
+                if (oldBoard != newBoard) continue;
+                else //↑↑↑there is something here that ducks stuff up ↑↑↑
                 {
                     this.CrosswordBoard = oldBoard;
                     this.CurrentCount++;
-                    for (int k = 0; k < this.CrosswordBoard.GetLength(0); k++)
-                    {
-                        for (int j = 0; j < this.CrosswordBoard.GetLength(1); j++)
-                        {
-                            Console.Write(this.CrosswordBoard[k, j] + "|");
-                        }
-                        Console.WriteLine();
-                    }
-                    Console.WriteLine("__________________________");
                     return;
                 }
             }
@@ -129,7 +120,7 @@ namespace KrydsOgTværsKonsole
             {
                 extraBoard[currentIndex + wordDifferents, i + startingPoint] = word[i];
             }
-            if (FoundFlawInBoard(board)) return board;
+            if (FoundFlawInBoard(extraBoard)) return board;
             return extraBoard;
         }
         private bool FoundFlawInBoard(char[,] newBoard)

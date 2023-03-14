@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KrydsOgTværsKonsole
 {
-    internal class RNG
+    public class RNG
     {
         private static readonly Random Random = new Random();
 
