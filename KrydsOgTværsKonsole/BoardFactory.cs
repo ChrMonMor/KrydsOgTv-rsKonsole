@@ -55,17 +55,15 @@ namespace KrydsOgTværsKonsole
             string bottomWord = WordListFactory.WordsWithLetterArray(WordListFactory.WordListDansk(newWordsLength, newWordsLength), startingLongWord[startingLongWord.Length - startingPoint - 1]).First(x => x.Last() == startingLongWord[startingLongWord.Length - startingPoint - 1]);
             string middleWord = WordListFactory.WordsWithLetterArray(WordListFactory.WordListDansk(newWordsLength,newWordsLength), startingLongWord[startingLongWord.Length/2]).First(x => x[newWordsLength/2] == startingLongWord[startingLongWord.Length/2]);
 
-            AddWordVertically('@'+topWord, this.SizeX / 2 - 1, differnt);
+            AddWordVertically(topWord + '@', this.SizeX / 2, differnt);
 
             AddWordVertically('@' + middleWord + '@', this.SizeX / 4, this.SizeY / 2);
 
-            AddWordVertically(bottomWord+'@', this.SizeX / 2 - newWordsLength + 1, this.SizeY - differnt - 1);
+            AddWordVertically('@' + bottomWord, this.SizeX / 2 - newWordsLength, this.SizeY - differnt - 1);
 
             AnalyseOpptions();
 
             FillIllegalSpace();
-
-            int tk = 0;
 
         }
         private void AddBlankAtCircularSymmetry(int x, int y)
@@ -74,49 +72,99 @@ namespace KrydsOgTværsKonsole
         }
         private void FillIllegalSpace()
         {
+            string[] ourWords = new string[] { };
             for (int i = 0; i < this.SizeX; i++)
             {
-                if (this.Board[i, 2] == '@' || Char.IsLetter(this.Board[i, 2]))
+                string sH = "";
+                string sV = "";
+                for (int j = 0; j < this.SizeY; j++)
                 {
-                    this.Board[i, 1] = '@';
-                    this.Board[i, 0] = '@';
+                    if (this.Board[i, j] == '\0')
+                    {
+                        sH += '_';
+                    }
+                    else
+                    {
+                        sH += this.Board[i, j];
+                    }
+                    if (this.Board[j, i] == '\0')
+                    {
+                        sV += '_';
+                    }
+                    else
+                    {
+                        sV += this.Board[j, i];
+                    }
                 }
-                if (this.Board[i, 1] == '@' || Char.IsLetter(this.Board[i, 1]))
-                {
-                    this.Board[i, 0] = '@';
-                }
-                if (this.Board[i, this.SizeY - 3] == '@' || Char.IsLetter(this.Board[this.SizeY - 3, 2]))
-                {
-                    this.Board[i, this.SizeY - 2] = '@';
-                    this.Board[i, this.SizeY - 1] = '@';
-                }
-                if (this.Board[i, this.SizeY - 2] == '@' || Char.IsLetter(this.Board[this.SizeY - 2, 2]))
-                {
-                    this.Board[i, this.SizeY - 1] = '@';
-                }
+                ourWords = ourWords.Append(sH).ToArray();
+                ourWords = ourWords.Append(sV).ToArray();
             }
-
-            for (int i = 0; i < this.SizeY; i++)
+            int[] targets = new int[] { };
+            for (int i = 0; i < ourWords.Count(); i++)
             {
-                if (this.Board[1, i] == '@' || Char.IsLetter(this.Board[1, i]))
+                for (int j = 0; j < ourWords[i].Length; j++)
                 {
-                    this.Board[0, i] = '@';
-                }
-                if (this.Board[2, i] == '@' || Char.IsLetter(this.Board[2, i]))
-                {
-                    this.Board[1, i] = '@';
-                    this.Board[0, i] = '@';
-                }
-                if (this.Board[this.SizeX - 2, i] == '@' || Char.IsLetter(this.Board[this.SizeX - 2, i]))
-                {
-                    this.Board[this.SizeX - 1, i] = '@';
-                }
-                if (this.Board[this.SizeX - 3, i] == '@' || Char.IsLetter(this.Board[this.SizeX - 3, i]))
-                {
-                    this.Board[this.SizeX - 2, i] = '@';
-                    this.Board[this.SizeX - 1, i] = '@';
+                    if (!char.IsLetter(ourWords[i][j]))
+                    {
+                        continue;
+                    }
+                    if (ourWords[i].Contains(ourWords[i][j]+"__"))
+                    {
+                        if (j + 3 < ourWords[i].Length)
+                        {
+                            if (ourWords[i].Contains(ourWords[i][j] + "__" + ourWords[i][j + 3]))
+                            {
+                                continue;
+                            }
+                            targets = targets.Append(i).ToArray();
+                        }
+                    }
+                    if (ourWords[i].Contains("__" + ourWords[i][j]))
+                    {
+                        if (j - 3 > 0)
+                        {
+                            if (ourWords[i].Contains(ourWords[i][j - 3] + "__" + ourWords[i][j]))
+                            {
+                                continue;
+                            }
+                            
+                        }
+                        targets = targets.Append(i).ToArray();
+                    }
                 }
             }
+            foreach (int index in targets)
+            {
+                // %2 is horizontal lines
+                if (index % 2 == 0)
+                {
+                    for (int i = 0; i < this.SizeX - 1; i++)
+                    {
+                        if (this.Board[index/2, i] == '\0')
+                        {
+                            this.Board[index / 2, i] = '@';
+                            AddBlankAtCircularSymmetry(index / 2, i);
+                            this.Board[index / 2, i+1] = '@';
+                            AddBlankAtCircularSymmetry(index / 2, i+1);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < this.SizeX - 1; i++)
+                    {
+                        if (this.Board[i, index / 2] == '_')
+                        {
+                            this.Board[i, index / 2] = '@';
+                            AddBlankAtCircularSymmetry(i, index / 2);
+                            this.Board[i + 1, index / 2] = '@';
+                            AddBlankAtCircularSymmetry(i + 1, index / 2);
+                            break;
+                        }
+                    }
+                }
+            } 
         }
         private void AddWordVertically(string word, int xStart, int yStart)
         {
