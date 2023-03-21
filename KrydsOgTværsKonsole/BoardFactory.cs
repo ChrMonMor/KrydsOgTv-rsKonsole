@@ -13,7 +13,7 @@ namespace KrydsOgTværsKonsole
         /// '@' = blocked space. Can not add letter inside of
         /// 
         /// </summary>
-
+        private readonly string letters = "abcdefghijklmnopqrstuvwxyzæøå";
 
         public int BoardId { get; set; }
         public char[,] Board { get; set; }
@@ -55,15 +55,15 @@ namespace KrydsOgTværsKonsole
             string bottomWord = WordListFactory.WordsWithLetterArray(WordListFactory.WordListDansk(newWordsLength, newWordsLength), startingLongWord[startingLongWord.Length - startingPoint - 1]).First(x => x.Last() == startingLongWord[startingLongWord.Length - startingPoint - 1]);
             string middleWord = WordListFactory.WordsWithLetterArray(WordListFactory.WordListDansk(newWordsLength,newWordsLength), startingLongWord[startingLongWord.Length/2]).First(x => x[newWordsLength/2] == startingLongWord[startingLongWord.Length/2]);
 
-            AddWordVertically(topWord + '@', this.SizeX / 2, differnt);
+            AddWordVertically(topWord, this.SizeX / 2, differnt);
 
-            AddWordVertically('@' + middleWord + '@', this.SizeX / 4, this.SizeY / 2);
+            AddWordVertically(middleWord, this.SizeX / 4 + 1, this.SizeY / 2);
 
-            AddWordVertically('@' + bottomWord, this.SizeX / 2 - newWordsLength, this.SizeY - differnt - 1);
-
-            AnalyseOpptions();
+            AddWordVertically(bottomWord, this.SizeX / 2 - newWordsLength + 1, this.SizeY - differnt - 1);
 
             FillIllegalSpace();
+
+            AnalyseOpptions();
 
         }
         private void AddBlankAtCircularSymmetry(int x, int y)
@@ -112,24 +112,39 @@ namespace KrydsOgTværsKonsole
                     {
                         if (j + 3 < ourWords[i].Length)
                         {
+                            if (ourWords[i][j + 3] == '_')
+                            {
+                                continue;
+                            }
                             if (ourWords[i].Contains(ourWords[i][j] + "__" + ourWords[i][j + 3]))
                             {
                                 continue;
                             }
-                            targets = targets.Append(i).ToArray();
                         }
+                        if (j + 3 > ourWords.Length)
+                        {
+                            continue;
+                        }
+                        targets = targets.Append(i).ToArray();
                     }
                     if (ourWords[i].Contains("__" + ourWords[i][j]))
                     {
                         if (j - 3 > 0)
                         {
+                            if (ourWords[i][j - 3] == '_')
+                            {
+                                continue;
+                            }
                             if (ourWords[i].Contains(ourWords[i][j - 3] + "__" + ourWords[i][j]))
                             {
                                 continue;
                             }
-                            
                         }
-                        targets = targets.Append(i).ToArray();
+                        if (j - 3 < 0)
+                        {
+                            continue;
+                        }
+                        targets = targets.Append(i).ToArray(); 
                     }
                 }
             }
@@ -152,9 +167,9 @@ namespace KrydsOgTværsKonsole
                 }
                 else
                 {
-                    for (int i = 0; i < this.SizeX - 1; i++)
+                    for (int i = 0; i < this.SizeY - 1; i++)
                     {
-                        if (this.Board[i, index / 2] == '_')
+                        if (this.Board[i, index / 2] == '\0')
                         {
                             this.Board[i, index / 2] = '@';
                             AddBlankAtCircularSymmetry(i, index / 2);
@@ -284,7 +299,7 @@ namespace KrydsOgTværsKonsole
                 }
             }
             ourWords = ourWords.Where(x => x.Count(char.IsLetter) > 1).ToArray();
-            ourWords = ourWords.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            ourWords = ourWords.Where(x => !string.IsNullOrEmpty(x) && x.Contains('_')).ToArray();
 
             int tk = 0;
         }
